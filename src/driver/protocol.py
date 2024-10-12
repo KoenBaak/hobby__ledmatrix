@@ -99,7 +99,7 @@ class MatrixDriver:
 
     def wow(self):
         for c in [
-            Color(red=1, green=0, blue=1),
+            Color(red=1, green=0, blue=0),
             Color(red=1, green=1, blue=0),
             Color(red=1, green=0, blue=1),
             Color(red=0, green=1, blue=0),
