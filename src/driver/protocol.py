@@ -43,6 +43,7 @@ class MatrixDriver:
         self.color_manager = ColorManager(n_bits=n_color_bits)
         self.cycle_duration_ms = sum(2**i for i in range(n_color_bits))
         self.frames_per_second = 1_000 / self.cycle_duration_ms
+        self.prepare_pins()
         print(self.profile())
 
     def profile(self) -> Profile:
