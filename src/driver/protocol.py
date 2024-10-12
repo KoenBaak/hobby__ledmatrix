@@ -101,7 +101,7 @@ class MatrixDriver:
 
     def enable_output(self, delay_ms: int) -> None:
         gpio.output(Pins.OUTPUT_ENABLE, 0)
-        time.sleep(delay_ms * 0.000000001)
+        time.sleep(delay_ms * 0.001)
         gpio.output(Pins.OUTPUT_ENABLE, 1)
 
     def display_row_pair(
@@ -114,13 +114,13 @@ class MatrixDriver:
 
     def run_pwm_cycle(self, frame: list[list[Color]]) -> None:
         for idx in range(self.n_rows // 2):
-            for bit_plane in range(self.color_manager.n_bits - 1, -1, -1):
-                self.display_row_pair(
-                    idx=idx,
-                    top_row=frame[idx],
-                    bottom_row=frame[self.n_rows // 2 + idx],
-                    bit_plane=bit_plane,
-                )
+            # for bit_plane in range(self.color_manager.n_bits - 1, -1, -1):
+            self.display_row_pair(
+                idx=idx,
+                top_row=frame[idx],
+                bottom_row=frame[self.n_rows // 2 + idx],
+                bit_plane=1,
+            )
 
     def show_frame(self, frame: list[list[Color]]) -> None:
         while True:
