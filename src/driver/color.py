@@ -14,9 +14,9 @@ class ColorManager:
 
     def relative(self, red: float, green: float, blue: float) -> Color:
         return Color(
-            red=self.max_value * red,
-            green=self.max_value * green,
-            blue=self.max_value * blue,
+            red=int(self.max_value * red),
+            green=int(self.max_value * green),
+            blue=int(self.max_value * blue),
         )
 
     def red(self) -> Color:
