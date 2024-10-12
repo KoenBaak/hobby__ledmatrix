@@ -101,7 +101,7 @@ class MatrixDriver:
 
     def enable_output(self, delay_ms: int) -> None:
         gpio.output(Pins.OUTPUT_ENABLE, 0)
-        time.sleep(delay_ms * 0.0001)
+        # time.sleep(delay_ms * 0.00001)
         gpio.output(Pins.OUTPUT_ENABLE, 1)
 
     def display_row_pair(
