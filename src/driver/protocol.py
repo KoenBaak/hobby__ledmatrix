@@ -22,13 +22,11 @@ class Pins:
 
 class MatrixDriver:
     def __init__(
-        self,
-        n_rows: int = 64,
-        n_cols: int = 64,
+        self, n_rows: int = 64, n_cols: int = 64, n_color_bits: int = 8
     ) -> None:
         self.n_rows = n_rows
         self.n_cols = n_cols
-        self.color_manager = ColorManager()
+        self.color_manager = ColorManager(n_bits=n_color_bits)
         self.prepare_pins()
 
     def prepare_pins(self) -> None:
@@ -59,17 +57,15 @@ class MatrixDriver:
         gpio.output(Pins.E, idx & 16)
 
     def clock_row_data(
-        self,
-        top_row: list[Color],
-        bottom_row: list[Color],
+        self, top_row: list[Color], bottom_row: list[Color], bit_plane: int
     ) -> None:
         for col in range(self.n_cols):
-            gpio.output(Pins.R1, top_row[col].red)
-            gpio.output(Pins.G1, top_row[col].green)
-            gpio.output(Pins.B1, top_row[col].blue)
-            gpio.output(Pins.R2, bottom_row[col].red)
-            gpio.output(Pins.G2, bottom_row[col].green)
-            gpio.output(Pins.B2, bottom_row[col].blue)
+            gpio.output(Pins.R1, (top_row[col].red >> bit_plane) & 1)
+            gpio.output(Pins.G1, (top_row[col].green >> bit_plane) & 1)
+            gpio.output(Pins.B1, (top_row[col].blue >> bit_plane) & 1)
+            gpio.output(Pins.R2, (bottom_row[col].red >> bit_plane) & 1)
+            gpio.output(Pins.G2, (bottom_row[col].green >> bit_plane) & 1)
+            gpio.output(Pins.B2, (bottom_row[col].blue >> bit_plane) & 1)
             gpio.output(Pins.CLOCK, 1)
             gpio.output(Pins.OUTPUT_ENABLE, 0)
             gpio.output(Pins.CLOCK, 0)
@@ -80,20 +76,23 @@ class MatrixDriver:
         gpio.output(Pins.LATCH, 0)
 
     def display_row_pair(
-        self, idx: int, top_row: list[Color], bottom_row: list[Color]
+        self, idx: int, top_row: list[Color], bottom_row: list[Color], bit_plane: int
     ) -> None:
         self.select_row_pair(idx=idx)
-        self.clock_row_data(top_row=top_row, bottom_row=bottom_row)
+        self.clock_row_data(top_row=top_row, bottom_row=bottom_row, bit_plane=bit_plane)
         self.latch_data()
 
-    def display_frame(self, frame: list[list[Color]]) -> None:
-        for idx in range(self.n_rows // 2):
-            self.display_row_pair(
-                idx=idx,
-                top_row=frame[idx],
-                bottom_row=frame[self.n_rows // 2 + idx],
-            )
+    def run_cycle(self, frame: list[list[Color]]) -> None:
+        for bit_plane in range(self.color_manager.n_bits):
+            for _ in range(2**bit_plane):
+                for idx in range(self.n_rows // 2):
+                    self.display_row_pair(
+                        idx=idx,
+                        top_row=frame[idx],
+                        bottom_row=frame[self.n_rows // 2 + idx],
+                        bit_plane=bit_plane,
+                    )
 
     def show_frame(self, frame: list[list[Color]]) -> None:
         while True:
-            self.display_frame(frame=frame)
+            self.run_cycle(frame=frame)
