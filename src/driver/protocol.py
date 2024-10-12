@@ -90,7 +90,7 @@ class MatrixDriver:
                 idx=idx,
                 top_row=frame[idx],
                 bottom_row=frame[self.n_rows // 2 + idx],
-                bit_plane=1,
+                bit_plane=0,
             )
 
     def show_frame(self, frame: list[list[Color]]) -> None:
