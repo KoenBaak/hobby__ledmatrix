@@ -113,8 +113,8 @@ class MatrixDriver:
         self.enable_output(delay_ms=2**bit_plane)
 
     def run_pwm_cycle(self, frame: list[list[Color]]) -> None:
-        for bit_plane in range(self.color_manager.n_bits - 1, -1, -1):
-            for idx in range(self.n_rows // 2):
+        for idx in range(self.n_rows // 2):
+            for bit_plane in range(self.color_manager.n_bits - 1, -1, -1):
                 self.display_row_pair(
                     idx=idx,
                     top_row=frame[idx],
