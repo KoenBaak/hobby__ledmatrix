@@ -84,7 +84,7 @@ class MatrixDriver:
 
     def run_cycle(self, frame: list[list[Color]]) -> None:
         for bit_plane in range(self.color_manager.n_bits, 0, -1):
-            for _ in range(bit_plane):
+            for _ in range(2**bit_plane):
                 for idx in range(self.n_rows // 2):
                     self.display_row_pair(
                         idx=idx,
