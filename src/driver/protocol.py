@@ -83,16 +83,28 @@ class MatrixDriver:
         self.latch_data()
 
     def run_cycle(self, frame: list[list[Color]]) -> None:
-        for bit_plane in range(self.color_manager.n_bits, 0, -1):
-            for _ in range(2**bit_plane):
-                for idx in range(self.n_rows // 2):
-                    self.display_row_pair(
-                        idx=idx,
-                        top_row=frame[idx],
-                        bottom_row=frame[self.n_rows // 2 + idx],
-                        bit_plane=bit_plane,
-                    )
+        # for bit_plane in range(self.color_manager.n_bits, 0, -1):
+        # for _ in range(2**bit_plane):
+        for idx in range(self.n_rows // 2):
+            self.display_row_pair(
+                idx=idx,
+                top_row=frame[idx],
+                bottom_row=frame[self.n_rows // 2 + idx],
+                bit_plane=1,
+            )
 
     def show_frame(self, frame: list[list[Color]]) -> None:
         while True:
             self.run_cycle(frame=frame)
+
+    def wow(self):
+        for c in [
+            Color(red=1, green=0, blue=1),
+            Color(red=1, green=1, blue=0),
+            Color(red=1, green=0, blue=1),
+            Color(red=0, green=1, blue=0),
+            Color(red=0, green=1, blue=1),
+            Color(red=0, green=0, blue=1),
+        ]:
+            for _ in range(100):
+                self.run_cycle(frame=[[c] * self.n_rows] * self.n_cols)
