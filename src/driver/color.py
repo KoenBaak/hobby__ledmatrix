@@ -8,7 +8,7 @@ class Color(NamedTuple):
 
 
 class ColorManager:
-    def __init__(self, n_bits: int = 8) -> None:
+    def __init__(self, n_bits: int = 1) -> None:
         self.n_bits = n_bits
         self.max_value = 2**n_bits - 1
 

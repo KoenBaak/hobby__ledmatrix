@@ -1,17 +1,6 @@
-import time
-from dataclasses import dataclass
 import RPi.GPIO as gpio
 
 from driver.color import Color, ColorManager
-
-
-@dataclass
-class Profile:
-    n_rows: int
-    n_cols: int
-    n_color_bits: int
-    cycle_duration_ms: int
-    fps: float
 
 
 class Pins:
@@ -36,24 +25,11 @@ class MatrixDriver:
         self,
         n_rows: int = 64,
         n_cols: int = 64,
-        n_color_bits: int = 8,
     ) -> None:
         self.n_rows = n_rows
         self.n_cols = n_cols
-        self.color_manager = ColorManager(n_bits=n_color_bits)
-        self.cycle_duration_ms = sum(2**i for i in range(n_color_bits))
-        self.frames_per_second = 1_000 / self.cycle_duration_ms
+        self.color_manager = ColorManager()
         self.prepare_pins()
-        print(self.profile())
-
-    def profile(self) -> Profile:
-        return Profile(
-            n_rows=self.n_rows,
-            n_cols=self.n_cols,
-            n_color_bits=self.color_manager.n_bits,
-            cycle_duration_ms=self.cycle_duration_ms,
-            fps=self.frames_per_second,
-        )
 
     def prepare_pins(self) -> None:
         gpio.setmode(gpio.BCM)
@@ -83,18 +59,19 @@ class MatrixDriver:
         gpio.output(Pins.E, idx & 16)
 
     def clock_row_data(
-        self, top_row: list[Color], bottom_row: list[Color], bit_plane: int
+        self,
+        top_row: list[Color],
+        bottom_row: list[Color],
     ) -> None:
         for col in range(self.n_cols):
-            gpio.output(Pins.R1, (top_row[col].red >> bit_plane) & 1)
-            gpio.output(Pins.G1, (top_row[col].green >> bit_plane) & 1)
-            gpio.output(Pins.B1, (top_row[col].blue >> bit_plane) & 1)
-            gpio.output(Pins.R2, (bottom_row[col].red >> bit_plane) & 1)
-            gpio.output(Pins.G2, (bottom_row[col].green >> bit_plane) & 1)
-            gpio.output(Pins.B2, (bottom_row[col].blue >> bit_plane) & 1)
+            gpio.output(Pins.R1, top_row[col].red)
+            gpio.output(Pins.G1, top_row[col].green)
+            gpio.output(Pins.B1, top_row[col].blue)
+            gpio.output(Pins.R2, bottom_row[col].red)
+            gpio.output(Pins.G2, bottom_row[col].green)
+            gpio.output(Pins.B2, bottom_row[col].blue)
             gpio.output(Pins.CLOCK, 1)
             gpio.output(Pins.OUTPUT_ENABLE, 0)
-            # time.sleep(0.0000001)
             gpio.output(Pins.CLOCK, 0)
             gpio.output(Pins.OUTPUT_ENABLE, 1)
 
@@ -102,29 +79,21 @@ class MatrixDriver:
         gpio.output(Pins.LATCH, 1)
         gpio.output(Pins.LATCH, 0)
 
-    def enable_output(self, delay_ms: int) -> None:
-        gpio.output(Pins.OUTPUT_ENABLE, 0)
-        time.sleep(delay_ms * 0.000001)
-        gpio.output(Pins.OUTPUT_ENABLE, 1)
-
     def display_row_pair(
-        self, idx: int, top_row: list[Color], bottom_row: list[Color], bit_plane: int
+        self, idx: int, top_row: list[Color], bottom_row: list[Color]
     ) -> None:
         self.select_row_pair(idx=idx)
-        self.clock_row_data(top_row=top_row, bottom_row=bottom_row, bit_plane=bit_plane)
+        self.clock_row_data(top_row=top_row, bottom_row=bottom_row)
         self.latch_data()
-        # self.enable_output(delay_ms=2**bit_plane)
 
-    def run_pwm_cycle(self, frame: list[list[Color]]) -> None:
+    def display_frame(self, frame: list[list[Color]]) -> None:
         for idx in range(self.n_rows // 2):
-            for bit_plane in range(self.color_manager.n_bits - 1, -1, -1):
-                self.display_row_pair(
-                    idx=idx,
-                    top_row=frame[idx],
-                    bottom_row=frame[self.n_rows // 2 + idx],
-                    bit_plane=bit_plane,
-                )
+            self.display_row_pair(
+                idx=idx,
+                top_row=frame[idx],
+                bottom_row=frame[self.n_rows // 2 + idx],
+            )
 
     def show_frame(self, frame: list[list[Color]]) -> None:
         while True:
-            self.run_pwm_cycle(frame=frame)
+            self.display_frame(frame=frame)
