@@ -100,9 +100,9 @@ class MatrixDriver:
         gpio.output(Pins.LATCH, 0)
 
     def enable_output(self, delay_ms: int) -> None:
-        gpio.output(Pins.OUTPUT_ENABLE, 1)
-        time.sleep(delay_ms * 0.001)
         gpio.output(Pins.OUTPUT_ENABLE, 0)
+        time.sleep(delay_ms * 0.001)
+        gpio.output(Pins.OUTPUT_ENABLE, 1)
 
     def display_row_pair(
         self, idx: int, top_row: list[Color], bottom_row: list[Color], bit_plane: int
