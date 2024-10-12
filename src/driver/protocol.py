@@ -93,7 +93,10 @@ class MatrixDriver:
             gpio.output(Pins.G2, (bottom_row[col].green >> bit_plane) & 1)
             gpio.output(Pins.B2, (bottom_row[col].blue >> bit_plane) & 1)
             gpio.output(Pins.CLOCK, 1)
+            gpio.output(Pins.OUTPUT_ENABLE, 0)
+            time.sleep(0.000001)
             gpio.output(Pins.CLOCK, 0)
+            gpio.output(Pins.OUTPUT_ENABLE, 1)
 
     def latch_data(self) -> None:
         gpio.output(Pins.LATCH, 1)
