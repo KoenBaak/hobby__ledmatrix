@@ -94,7 +94,7 @@ class MatrixDriver:
             gpio.output(Pins.B2, (bottom_row[col].blue >> bit_plane) & 1)
             gpio.output(Pins.CLOCK, 1)
             gpio.output(Pins.OUTPUT_ENABLE, 0)
-            time.sleep(0.000001)
+            time.sleep(0.0000001)
             gpio.output(Pins.CLOCK, 0)
             gpio.output(Pins.OUTPUT_ENABLE, 1)
 
